@@ -31,14 +31,14 @@ point_lon = 37.8222
 satellite_lat = max(min(satellite_lat, 90), -90)
 satellite_lon = max(min(satellite_lon, 180), -180)
 
-# Создайте объекты точек с координатами
+# Создание объектов точек с координатами
 satellite_point = Point(latitude=satellite_lat, longitude=satellite_lon)
 point_on_map = Point(latitude=point_lat, longitude=point_lon)
 
-# Вычислите расстояние между спутником и точкой
+# Вычисление расстояния между спутником и точкой
 distance = great_circle(satellite_point, point_on_map).kilometers
 
-# Вычислите азимут от спутника к точке
+# Вычисление азимута от спутника к точке
 azimuth = math.degrees(math.atan2(math.sin(point_lon - satellite_lon), math.cos(satellite_lat) * math.tan(point_lat) - math.sin(satellite_lat) * math.cos(point_lon - satellite_lon)))
 
 print("Расстояние от спутника до точки на карте:", distance, "километров")
