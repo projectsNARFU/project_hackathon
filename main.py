@@ -1,6 +1,5 @@
 import json
 import ast
-from test_lre import test_func
 
 
 def create_coords(info_coords):
@@ -11,7 +10,7 @@ def create_coords(info_coords):
 
 def input_coords():
     """вводим координаты местности"""
-    coords = input()
+    coords = input("введите координаты в формате: широта долгота")
     coords = coords.replace(',', '')
     coords = coords.split()
 
@@ -25,5 +24,4 @@ if __name__ == '__main__':
     with open("choosed_coords.geojson", 'r') as f:
         info_coords = f.readline()
         info_coords = ast.literal_eval(info_coords)
-        print(info_coords["coordinates"])
     f.close()
