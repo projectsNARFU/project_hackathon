@@ -5,49 +5,91 @@ from geopy.distance import great_circle
 from geopy import Point
 import math
 import ast
-# Данные о спутнике и даты и время
-tle_line1 = "1 25544U 98067A   21153.29711597  .00001425  00000-0  32995-4 0  9999"
-tle_line2 = "2 25544  51.6442  37.8222 0009500 307.6155  52.4418 15.49055797391289"
-datetime_str = "2021-06-02 12:00:00"
-
-# Разбор строки TLE
-satellite = twoline2rv(tle_line1, tle_line2, wgs72)
-
-# Парсинг даты и времени
-date_time = datetime.strptime(datetime_str, "%Y-%m-%d %H:%M:%S")
-
-# Вычисление координаты и скорости спутника в заданное время
-position, velocity = satellite.propagate(date_time.year, date_time.month, date_time.day,
-                                         date_time.hour, date_time.minute, date_time.second)
-
-# Координаты спутника
-satellite_lat = position[0]
-satellite_lon = position[1]
-
-# Координаты точки на карте
-with open("choosed_coords.geojson", 'r') as f:
-    info_coords = f.readline()
-    info_coords = ast.literal_eval(info_coords)
-f.close()
-point_lat, point_lon = info_coords["coordinates"]
-point_lat = int(point_lat)
-point_lon = int(point_lon)
+import datetime
 
 
+def check_coordinates(satellite_lat, satellite_lon):
+    return max(min(satellite_lat, 90), -90), max(min(satellite_lon, 180), -180)
 
-# Нормализация координат спутника, чтобы убедиться, что они находятся в правильном диапазоне
-satellite_lat = max(min(satellite_lat, 90), -90)
-satellite_lon = max(min(satellite_lon, 180), -180)
 
-# Создайте объекты точек с координатами
-satellite_point = Point(latitude=satellite_lat, longitude=satellite_lon)
-point_on_map = Point(latitude=point_lat, longitude=point_lon)
+def take_geojson_coordinates():
+    # Координаты точки на карте
+    with open("choosed_coords.geojson", 'r') as f:
+        info_coords = f.readline()
+        info_coords = ast.literal_eval(info_coords)
+    f.close()
+    point_lat, point_lon = info_coords["coordinates"]
+    point_lat = int(point_lat)
+    point_lon = int(point_lon)
+    return point_lat, point_lon
 
-# Вычислите расстояние между спутником и точкой
-distance = great_circle(satellite_point, point_on_map).kilometers
 
-# Вычислите азимут от спутника к точке
-azimuth = math.degrees(math.atan2(math.sin(point_lon - satellite_lon), math.cos(satellite_lat) * math.tan(point_lat) - math.sin(satellite_lat) * math.cos(point_lon - satellite_lon)))
+def count_azimuth(point_lon, point_lat, satellite_lon, satellite_lat):
+    return math.degrees(math.atan2(math.sin(point_lon - satellite_lon),
+                                   math.cos(st.satellite_lat) * math.tan(point_lat) - math.sin(
+                                       satellite_lat) * math.cos(point_lon - satellite_lon)))
 
-print("Расстояние от спутника до точки на карте:", distance, "километров")
-print("Азимут от спутника до точки на карте:", azimuth, "градусов")
+
+def create_point(lat, lon):
+    return Point(latitude=lat, longitude=lon)
+
+
+def find_distance_azimuth(satellite_lat, satellite_lon):
+    point_lat, point_lon = take_geojson_coordinates()
+
+    # Создаем объекты точек с координатами
+    satellite_point = create_point(satellite_lat, satellite_lon)
+    point_on_map = create_point(point_lat, point_lon)
+
+    # Вычисляем расстояние между спутником и точкой
+    distance = great_circle(satellite_point, point_on_map).kilometers
+
+    # Вычисляем азимут от спутника к точке
+    azimuth = count_azimuth(point_lon, point_lat, satellite_lon, satellite_lat)
+
+    print("Расстояние от спутника до точки на карте:", distance, "километров")
+    print("Азимут от спутника до точки на карте:", azimuth, "градусов\n")
+
+
+class Satellite:
+
+    def __init__(self, id, tle_line1, tle_line2):  # Метод инициализации
+        self.id = id
+        self.tle_line1 = tle_line1
+        self.tle_line2 = tle_line2  # Установка значений атрибутов
+        self.satellite = self.create_satellite()
+        self.datetime = datetime.datetime.now()
+        self.position, self.velocity = self.position_velocity()
+        self.satellite_lat, self.satellite_lon = self.satellite_coordinates()
+
+    def create_satellite(self):
+        return twoline2rv(self.tle_line1, self.tle_line2, wgs72)
+
+    # def parse_dat_time(self):
+    #     return datetime.strptime(datetime.datetime.now(), "%Y-%m-%d %H:%M:%S")
+
+    def position_velocity(self):
+        return self.satellite.propagate(self.datetime.year, self.datetime.month, self.datetime.day,
+                                        self.datetime.hour, self.datetime.minute, self.datetime.second)
+
+    def satellite_coordinates(self):
+        satellite_lat = self.position[0]
+        satellite_lon = self.position[1]
+        return check_coordinates(satellite_lat, satellite_lon)
+
+    def __str__(self):
+        return f"{self.id}{self.tle_line1}{self.tle_line2}"
+
+
+if __name__ == '__main__':
+    with open("satellite.txt", 'r') as f:
+        while True:
+            id = f.readline()
+            if not id:
+                break
+            tle_line1 = f.readline()
+            tle_line2 = f.readline()
+            st = Satellite(id, tle_line1, tle_line2)
+            print(st)
+            find_distance_azimuth(st.satellite_lat, st.satellite_lon)
+    f.close()
