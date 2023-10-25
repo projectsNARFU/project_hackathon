@@ -23,7 +23,6 @@ position, velocity = satellite.propagate(date_time.year, date_time.month, date_t
 with open("choosed_coords.geojson", 'r') as f:
     info_coords = f.readline()
     info_coords = ast.literal_eval(info_coords)
-    print(info_coords["coordinates"])
 f.close()
 point_lat, point_lon = info_coords["coordinates"]
 point_lat = int(point_lat)
