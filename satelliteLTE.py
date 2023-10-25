@@ -34,7 +34,6 @@ point_lat = int(point_lat)
 point_lon = int(point_lon)
 
 
-
 # Нормализация координат спутника, чтобы убедиться, что они находятся в правильном диапазоне
 satellite_lat = max(min(satellite_lat, 90), -90)
 satellite_lon = max(min(satellite_lon, 180), -180)
