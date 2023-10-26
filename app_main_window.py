@@ -21,13 +21,22 @@ class windows(tk.Tk):
         main_container = tk.Frame(self, height=400, width=800)
         main_container.pack()
 
+        # configuring the location of the container using grid
+        main_container.grid_rowconfigure(0, weight=1)
+        main_container.grid_columnconfigure(0, weight=1)
+
         # контейнер для левых фреймов
         left_container = tk.Frame(main_container, height=400, width=600)
         left_container.pack(side="left", fill="both", expand=True)
+        left_container.grid_rowconfigure(0, weight=1)
+        left_container.grid_columnconfigure(0, weight=1)
+
 
         # контейнер для правых фреймов
         right_container = tk.Frame(main_container, height=400, width=600)
         right_container.pack(side="right", fill="both", expand=True)
+        right_container.grid_rowconfigure(0, weight=1)
+        right_container.grid_columnconfigure(0, weight=1)
 
         # добавление фреймов в левый и правый контейнеры
         self.left_frames = {}
@@ -116,8 +125,14 @@ class CoordInputFrame(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
 
-        label = tk.Label(self, text="блок из поля ввода и карты")
-        label.pack(padx=10, pady=10)
+        self.columnconfigure(index=0, weight=1)
+        self.rowconfigure(index=0, weight=1)
+
+        coord_entry = tk.Entry(self)
+        coord_entry.grid(row=0)
+
+        map = tk.Label(self, text="блок из поля ввода и карты")
+        map.grid(row=1)
 
         # тут реализовывается переключение между "окнами"
         switch_window_button = tk.Button(
@@ -126,7 +141,7 @@ class CoordInputFrame(tk.Frame):
             command=lambda: controller.show_frame(cont=SatelliteInputFrame,
                                                   direction_frame=controller.right_frames),
         )
-        switch_window_button.pack(side="bottom", fill=tk.X)
+        switch_window_button.grid(row=2)
 
 
 class SatelliteInputFrame(tk.Frame):
