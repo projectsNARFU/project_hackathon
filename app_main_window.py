@@ -85,25 +85,30 @@ class ListInfoFrame(tk.Frame):
 
         # создаем список для вывода спутников
         data_var = tk.Variable(value=TEST_DB)
-        lbox = tk.Listbox(self, listvariable=data_var,
-                          width=40, height=10)
+        self.lbox = tk.Listbox(self, listvariable=data_var,
+                          width=40, height=17)
         # lbox.pack(side='left')
-        lbox.yview_scroll(number=1, what="units")
-        lbox.grid(sticky='w', row=0, column=0)
+        self.lbox.yview_scroll(number=1, what="units")
+        self.lbox.grid(sticky='w', row=0, column=0)
 
         # ввод данных из базы данных в список приложения
         for i in TEST_DB:
-            lbox.insert(0, i)
+            self.lbox.insert(0, i)
 
         # тут реализовывается переключение между "окнами"
         switch_window_button = tk.Button(
             self,
-            text="Go to the Side Page",
-            command=lambda: controller.show_frame(cont=SatelliteCardFrame,
-                                                  direction_frame=controller.left_frames),
+            text="посмотреть данные спутника",
+            command=self.open_info
+            # command=lambda: controller.show_frame(cont=SatelliteCardFrame,
+            #                                       direction_frame=controller.left_frames),
         )
-        # switch_window_button.pack(side='bottom')
+
         switch_window_button.grid(sticky='w', row=1, column=0)
+# {name_sate: class}
+    def open_info(self):
+        choosed_satellite = self.lbox.curselection()
+        print(choosed_satellite)
 
 
 class SatelliteCardFrame(tk.Frame):
