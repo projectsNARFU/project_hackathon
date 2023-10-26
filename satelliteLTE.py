@@ -1,4 +1,7 @@
+import pickle
 from datetime import datetime
+from class_serialize import Persistence_Exemplar as PE
+import requests
 from sgp4.earth_gravity import wgs72
 from sgp4.io import twoline2rv
 from geopy.distance import great_circle
@@ -46,12 +49,13 @@ def find_distance_azimuth(satellite_lat, satellite_lon):
 
     # Вычисляем азимут от спутника к точке
     azimuth = count_azimuth(point_lon, point_lat, satellite_lon, satellite_lat)
-
-    print("Расстояние от спутника до точки на карте:", distance, "километров")
-    print("Азимут от спутника до точки на карте:", azimuth, "градусов\n")
+    return distance, azimuth
+    # print("Расстояние от спутника до точки на карте:", distance, "километров")
+    # print("Азимут от спутника до точки на карте:", azimuth, "градусов\n")
 
 
 class Satellite:
+    satellites = []
 
     def __init__(self, id, tle_line1, tle_line2):  # Метод инициализации
         self.id = id
@@ -61,12 +65,25 @@ class Satellite:
         self.datetime = datetime.datetime.now()
         self.position, self.velocity = self.position_velocity()
         self.satellite_lat, self.satellite_lon = self.satellite_coordinates()
+        self.satellites.append(self)
+
+    def serialize(self):
+        with open('satellites.pkl', 'wb') as f:
+            pickle.dump(self.satellites, f)
+        f.close()
+
+    @staticmethod
+    def deserialize():
+        try:
+            with open('satellites.pkl', 'rb') as f:
+                satellites = pickle.load(f)
+        except FileNotFoundError:
+            print("File isn't found")
+        return satellites
 
     def create_satellite(self):
         return twoline2rv(self.tle_line1, self.tle_line2, wgs72)
 
-    # def parse_dat_time(self):
-    #     return datetime.strptime(datetime.datetime.now(), "%Y-%m-%d %H:%M:%S")
 
     def position_velocity(self):
         return self.satellite.propagate(self.datetime.year, self.datetime.month, self.datetime.day,
@@ -78,18 +95,65 @@ class Satellite:
         return check_coordinates(satellite_lat, satellite_lon)
 
     def __str__(self):
-        return f"{self.id}{self.tle_line1}{self.tle_line2}"
+        return f"{self.id}\n{self.tle_line1}\n{self.tle_line2}"
+
+
+def parse_info():
+    url = 'http://eostation.scanex.ru/schedule/tle/new.tle'
+    response = requests.get(url)
+    satellite_list = []
+    if response.status_code == 200:
+        str_list = response.content.decode("utf-8")
+
+        # for line in str_list:
+        #     if line.startswith("\n"):
+        #         satellite_list.append(line)
+        return str_list
+    else:
+        print("error", response.status_code)
+
+
+def show_satellite(find_id):
+    data = Satellite.deserialize()
+    for satellite in data:
+        if satellite.id == find_id:
+            print(satellite)
 
 
 if __name__ == '__main__':
-    with open("satellite.txt", 'r') as f:
-        while True:
-            id = f.readline()
-            if not id:
-                break
-            tle_line1 = f.readline()
-            tle_line2 = f.readline()
-            st = Satellite(id, tle_line1, tle_line2)
-            print(st)
-            find_distance_azimuth(st.satellite_lat, st.satellite_lon)
-    f.close()
+    closest_id = None
+    min_distance = float('inf')
+    closest_azimuth = 181
+
+
+    not_split_lines = parse_info()
+    lines = not_split_lines.split("\r\n")
+    last_info_update = lines[0]
+    lines = lines[:-1]
+
+    for i in range(1, len(lines) - 2, 3):
+        id = lines[i]
+        tle_line1 = lines[i + 1]
+        tle_line2 = lines[i + 2]
+        st = Satellite(id, tle_line1, tle_line2)
+        print(st)
+
+        st.serialize()
+        distance, azimuth = find_distance_azimuth(st.satellite_lat, st.satellite_lon)
+        print("Расстояние от спутника до точки на карте:", distance, "километров")
+        print("Азимут от спутника до точки на карте:", azimuth, "градусов\n")
+        if distance < min_distance:
+            min_distance = distance
+            closest_id = id
+        elif distance == min_distance:
+            if abs(azimuth) < abs(closest_azimuth):
+                closest_azimuth = azimuth
+                closest_id = id
+        # data = Satellite.deserialize()
+        # for satellite in data:
+        #     print(satellite.id)
+
+    show_satellite('TM-0102')
+
+    print(f"\n\nClosest satellite: {closest_id} Minimum Distance: {min_distance} kilometers\n" \
+          f"Minimum Azimuth: {closest_azimuth} degrees ")
