@@ -24,22 +24,13 @@ class windows(tk.Tk):
         main_container = tk.Frame(self, height=self.winfo_height(), width=self.winfo_width(), borderwidth=1, relief='solid')
         main_container.pack(anchor='n', fill='x', padx=5, pady=5)
 
-        # configuring the location of the container using grid
-        # main_container.grid_columnconfigure(0, weight=1)
-        # main_container.grid_columnconfigure(1, weight=1)
-
         # контейнер для левых фреймов
         left_container = tk.Frame(main_container, height=self.winfo_height()//2, width=self.winfo_width()//2, borderwidth=1, relief='solid')
         left_container.grid(sticky='e', row=0, column=0, ipadx=6, ipady=6, padx=4, pady=4)
-        # left_container.grid_columnconfigure(0, weight=1)
-        # left_container.grid_columnconfigure(1, weight=1)
-
 
         # контейнер для правых фреймов
         right_container = tk.Frame(main_container, height=400, width=600, borderwidth=1, relief='solid')
         right_container.grid(sticky='w', row=0, column=1, ipadx=6, ipady=6, padx=4, pady=4)
-        # right_container.grid_rowconfigure(0, weight=1)
-        # right_container.grid_rowconfigure(1, weight=1)
 
         # добавление фреймов в левый и правый контейнеры
         self.left_frames = {}
@@ -87,28 +78,24 @@ class ListInfoFrame(tk.Frame):
         data_var = tk.Variable(value=TEST_DB)
         self.lbox = tk.Listbox(self, listvariable=data_var,
                           width=40, height=17)
-        # lbox.pack(side='left')
         self.lbox.yview_scroll(number=1, what="units")
         self.lbox.grid(sticky='w', row=0, column=0)
-
-        # ввод данных из базы данных в список приложения
-        for i in TEST_DB:
-            self.lbox.insert(0, i)
 
         # тут реализовывается переключение между "окнами"
         switch_window_button = tk.Button(
             self,
             text="посмотреть данные спутника",
             command=self.open_info
-            # command=lambda: controller.show_frame(cont=SatelliteCardFrame,
-            #                                       direction_frame=controller.left_frames),
         )
 
         switch_window_button.grid(sticky='w', row=1, column=0)
-# {name_sate: class}
+
     def open_info(self):
+        """
+        берет имя спутника из списка приложения
+        """
         choosed_satellite = self.lbox.curselection()
-        print(choosed_satellite)
+        return TEST_DB[choosed_satellite[0]]
 
 
 class SatelliteCardFrame(tk.Frame):
