@@ -3,10 +3,9 @@ import tkinter as tk
 import main
 from tkinter import ttk
 
+from project_hackathon.satelliteLTE import satellites_name, start, show_satellite
 
-TEST_DB = ["Python", "JavaScript", "C#", "Java", "C++", "Rust", "Kotlin", "Swift",
-             "PHP", "Visual Basic.NET", "F#", "Ruby", "R", "Go", "C",
-             "T-SQL", "PL-SQL", "Typescript", "Assembly", "Fortran"]
+TEST_DB = satellites_name()
 
 
 class windows(tk.Tk):
@@ -19,7 +18,8 @@ class windows(tk.Tk):
         tk.Tk.__init__(self, *args, **kwargs)
 
         # название приложения
-        self.wm_title("Введите название")
+        self.wm_title("SatPhoto")
+        self.iconbitmap(r'C:\Users\zharyj.d\projects\project_hackathon\Земля.ico')
 
         # создание главного контейнера окна
         main_container = tk.Frame(self, height=self.winfo_height(), width=self.winfo_width(), borderwidth=1, relief='solid')
@@ -96,7 +96,7 @@ class ListInfoFrame(tk.Frame):
         берет имя спутника из списка приложения
         """
         choosed_satellite = self.lbox.curselection()
-        return TEST_DB[choosed_satellite[0]]
+        return show_satellite(TEST_DB[choosed_satellite[0]])
 
 
 class SatelliteCardFrame(tk.Frame):
@@ -104,6 +104,9 @@ class SatelliteCardFrame(tk.Frame):
     фрейм выводящий данные выбранного спутника
     """
     def __init__(self, parent, controller):
+
+        self.closest_id = None
+
         tk.Frame.__init__(self, parent)
         label = tk.Label(self, text="карточка выбранного спутника")
         label.grid(row=0, column=0)
@@ -132,10 +135,10 @@ class CoordInputFrame(tk.Frame):
         self.coord_entry = tk.Entry(self, width=50)
         self.coord_entry.grid(sticky='n', row=0, column=0)
 
-        self.satellite = tk.Label(self, height=1, width=30, text="123")
+        self.satellite = tk.Label(self, height=1, width=30, text="")
         self.satellite.grid(row=1, column=0)
 
-        map = tk.Label(self, height=17, width=30, text="карта")
+        map = tk.Label(self, height=17, width=30, text="")
         map.grid(row=2, column=0)
 
         # тут реализовывается переключение между "окнами"
@@ -152,6 +155,7 @@ class CoordInputFrame(tk.Frame):
         """
         coord = self.coord_entry.get()
         main.input_coord(coord)
+        self.closest_id = start()
 
         self.output_satellite()
 
@@ -159,7 +163,7 @@ class CoordInputFrame(tk.Frame):
         """
         выводит спутник в зависимости от координат
         """
-        self.satellite.config(text='спутник')
+        self.satellite.config(text=self.closest_id)
 
 class SatelliteInputFrame(tk.Frame):
     """фрейм для добавления нового спутника в базу данных по введенным данным"""
@@ -179,6 +183,7 @@ class SatelliteInputFrame(tk.Frame):
 
 if __name__ == "__main__":
     testObj = windows()
+    # testObj.iconbitmap(r'C:\Users\zharyj.d\projects\project_hackathon\Земля.ico')
 
     # настройка размера и начального положения приложения
     w = testObj.winfo_screenwidth()

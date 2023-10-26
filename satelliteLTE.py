@@ -29,7 +29,7 @@ def take_geojson_coordinates():
 
 def count_azimuth(point_lon, point_lat, satellite_lon, satellite_lat):
     return math.degrees(math.atan2(math.sin(point_lon - satellite_lon),
-                                   math.cos(st.satellite_lat) * math.tan(point_lat) - math.sin(
+                                   math.cos(satellite_lat) * math.tan(point_lat) - math.sin(
                                        satellite_lat) * math.cos(point_lon - satellite_lon)))
 
 
@@ -84,7 +84,6 @@ class Satellite:
     def create_satellite(self):
         return twoline2rv(self.tle_line1, self.tle_line2, wgs72)
 
-
     def position_velocity(self):
         return self.satellite.propagate(self.datetime.year, self.datetime.month, self.datetime.day,
                                         self.datetime.hour, self.datetime.minute, self.datetime.second)
@@ -120,11 +119,16 @@ def show_satellite(find_id):
             print(satellite)
 
 
-if __name__ == '__main__':
+def satellites_name():
+    list_sat = []
+    data = Satellite.deserialize()
+    for satellite in data:
+        list_sat.append(satellite.id)
+    return list_sat
+def start():
     closest_id = None
     min_distance = float('inf')
     closest_azimuth = 181
-
 
     not_split_lines = parse_info()
     lines = not_split_lines.split("\r\n")
@@ -157,3 +161,11 @@ if __name__ == '__main__':
 
     print(f"\n\nClosest satellite: {closest_id} Minimum Distance: {min_distance} kilometers\n" \
           f"Minimum Azimuth: {closest_azimuth} degrees ")
+
+
+    return closest_id
+
+
+
+if __name__ == '__main__':
+    start()
