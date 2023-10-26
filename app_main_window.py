@@ -1,5 +1,6 @@
 # coding=utf-8
 import tkinter as tk
+import main
 from tkinter import ttk
 
 
@@ -128,21 +129,37 @@ class CoordInputFrame(tk.Frame):
         self.columnconfigure(index=0, weight=1)
         self.rowconfigure(index=0, weight=1)
 
-        coord_entry = tk.Entry(self, width=50)
-        coord_entry.grid(sticky='n', row=0, column=0)
+        self.coord_entry = tk.Entry(self, width=50)
+        self.coord_entry.grid(sticky='n', row=0, column=0)
+
+        self.satellite = tk.Label(self, height=1, width=30, text="123")
+        self.satellite.grid(row=1, column=0)
 
         map = tk.Label(self, height=17, width=30, text="карта")
-        map.grid(row=1, column=0)
+        map.grid(row=2, column=0)
 
         # тут реализовывается переключение между "окнами"
         switch_window_button = tk.Button(
             self,
-            text="Go to the Side Page",
-            command=lambda: controller.show_frame(cont=SatelliteInputFrame,
-                                                  direction_frame=controller.right_frames),
+            text="отправить координаты",
+            command=self.input_coord
         )
-        switch_window_button.grid(row=2, column=0)
+        switch_window_button.grid(row=3, column=0)
 
+    def input_coord(self):
+        """
+        ввод данных
+        """
+        coord = self.coord_entry.get()
+        main.input_coord(coord)
+
+        self.output_satellite()
+
+    def output_satellite(self):
+        """
+        выводит спутник в зависимости от координат
+        """
+        self.satellite.config(text='спутник')
 
 class SatelliteInputFrame(tk.Frame):
     """фрейм для добавления нового спутника в базу данных по введенным данным"""
@@ -153,7 +170,7 @@ class SatelliteInputFrame(tk.Frame):
 
         switch_window_button = tk.Button(
             self,
-            text="Go to the Completion Screen",
+            text="вернуться обратно",
             command=lambda: controller.show_frame(cont=CoordInputFrame,
                                                   direction_frame=controller.right_frames),
         )
