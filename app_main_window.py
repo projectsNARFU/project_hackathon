@@ -1,3 +1,4 @@
+# coding=utf-8
 import tkinter as tk
 from tkinter import ttk
 
@@ -20,25 +21,25 @@ class windows(tk.Tk):
         self.wm_title("Введите название")
 
         # создание главного контейнера окна
-        main_container = tk.Frame(self, height=400, width=800)
-        main_container.pack()
+        main_container = tk.Frame(self, height=self.winfo_height(), width=self.winfo_width(), borderwidth=1, relief='solid')
+        main_container.pack(anchor='n', fill='x', padx=5, pady=5)
 
         # configuring the location of the container using grid
-        main_container.grid_rowconfigure(0, weight=1)
-        main_container.grid_columnconfigure(0, weight=1)
+        # main_container.grid_columnconfigure(0, weight=1)
+        # main_container.grid_columnconfigure(1, weight=1)
 
         # контейнер для левых фреймов
-        left_container = tk.Frame(main_container, height=400, width=600)
-        left_container.grid(row=0, column=0)
-        left_container.grid_rowconfigure(0, weight=1)
-        left_container.grid_columnconfigure(0, weight=1)
+        left_container = tk.Frame(main_container, height=self.winfo_height()//2, width=self.winfo_width()//2, borderwidth=1, relief='solid')
+        left_container.grid(sticky='e', row=0, column=0, ipadx=6, ipady=6, padx=4, pady=4)
+        # left_container.grid_columnconfigure(0, weight=1)
+        # left_container.grid_columnconfigure(1, weight=1)
 
 
         # контейнер для правых фреймов
-        right_container = tk.Frame(main_container, height=400, width=600)
-        right_container.grid(row=0, column=1)
-        right_container.grid_rowconfigure(0, weight=1)
-        right_container.grid_columnconfigure(0, weight=1)
+        right_container = tk.Frame(main_container, height=400, width=600, borderwidth=1, relief='solid')
+        right_container.grid(sticky='w', row=0, column=1, ipadx=6, ipady=6, padx=4, pady=4)
+        # right_container.grid_rowconfigure(0, weight=1)
+        # right_container.grid_rowconfigure(1, weight=1)
 
         # добавление фреймов в левый и правый контейнеры
         self.left_frames = {}
@@ -83,15 +84,12 @@ class ListInfoFrame(tk.Frame):
         tk.Frame.__init__(self, parent)
 
         # создаем список для вывода спутников
-        data_var = tk.StringVar(value=TEST_DB)
-        lbox = tk.Listbox(self, listvariable=data_var)
-        # lbox.geometry
-        lbox.grid(row=0, column=0)
-
-        scrollbar = ttk.Scrollbar(orient="vertical", command=lbox.yview)
-        scrollbar.pack(side='right', fill='y')
-
-        lbox["yscrollcommand"] = scrollbar.set
+        data_var = tk.Variable(value=TEST_DB)
+        lbox = tk.Listbox(self, listvariable=data_var,
+                          width=40, height=10)
+        # lbox.pack(side='left')
+        lbox.yview_scroll(number=1, what="units")
+        lbox.grid(sticky='w', row=0, column=0)
 
         # ввод данных из базы данных в список приложения
         for i in TEST_DB:
@@ -104,7 +102,8 @@ class ListInfoFrame(tk.Frame):
             command=lambda: controller.show_frame(cont=SatelliteCardFrame,
                                                   direction_frame=controller.left_frames),
         )
-        switch_window_button.grid(row=1, column=0)
+        # switch_window_button.pack(side='bottom')
+        switch_window_button.grid(sticky='w', row=1, column=0)
 
 
 class SatelliteCardFrame(tk.Frame):
@@ -137,10 +136,10 @@ class CoordInputFrame(tk.Frame):
         self.columnconfigure(index=0, weight=1)
         self.rowconfigure(index=0, weight=1)
 
-        coord_entry = tk.Entry(self)
-        coord_entry.grid(row=0, column=0)
+        coord_entry = tk.Entry(self, width=50)
+        coord_entry.grid(sticky='n', row=0, column=0)
 
-        map = tk.Label(self, text="блок из поля ввода и карты")
+        map = tk.Label(self, height=17, width=30, text="карта")
         map.grid(row=1, column=0)
 
         # тут реализовывается переключение между "окнами"
