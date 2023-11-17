@@ -3,7 +3,7 @@ import tkinter as tk
 import main
 from tkinter import ttk
 
-from project_hackathon.satelliteLTE import satellites_name, start, show_satellite
+from satelliteLTE import satellites_name, start, show_satellite
 
 TEST_DB = satellites_name()
 
@@ -19,7 +19,7 @@ class windows(tk.Tk):
 
         # название приложения
         self.wm_title("SatPhoto")
-        self.iconbitmap(r'C:\Users\zharyj.d\projects\project_hackathon\Земля.ico')
+        self.iconbitmap(r'Земля.ico')
 
         # создание главного контейнера окна
         main_container = tk.Frame(self, height=self.winfo_height(), width=self.winfo_width(), borderwidth=1, relief='solid')
@@ -181,9 +181,8 @@ class SatelliteInputFrame(tk.Frame):
         switch_window_button.grid(row=1, column=0)
 
 
-if __name__ == "__main__":
+def initialization():
     testObj = windows()
-    # testObj.iconbitmap(r'C:\Users\zharyj.d\projects\project_hackathon\Земля.ico')
 
     # настройка размера и начального положения приложения
     w = testObj.winfo_screenwidth()
@@ -196,3 +195,7 @@ if __name__ == "__main__":
     testObj.resizable(width=False, height=False)
 
     testObj.mainloop()
+
+
+if __name__ == "__main__":
+    initialization()
